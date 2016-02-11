@@ -12,7 +12,7 @@ from django.conf.urls import patterns, include, url, static
 
 
 urlpatterns = patterns(
-    'event.views',
+    'admin_trigger.views',
     url(r'^objects/(?P<content_type_id>[0-9]+)/?$', 'get_objects_from_content_type'),
     url(r'^fields/(?P<obj>[0-9]+:[0-9]+)/?$', 'get_fields_from_object'),
     url(r'^field/(?P<obj>[0-9]+:[0-9]+)/(?P<field>.+)/?$', 'get_formfield'),

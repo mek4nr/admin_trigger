@@ -1,10 +1,8 @@
-from event.models import TriggerDate, EventChangeField, TriggerField, Event
+from admin_trigger.models import TriggerDate, EventChangeField, Event
 from django import forms
 from django.forms.models import BaseInlineFormSet
-from tanuki.contants import mylog
 from django.contrib import admin
-from django.utils.translation import ugettext_lazy, ugettext as _
-from tanuki.admin import admin_tanuki
+from django.utils.translation import ugettext as _
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import ForeignKey
 from django.core.exceptions import ValidationError
@@ -122,7 +120,7 @@ class EventChangeFieldGenerator(object):
         all_obj = content_type.model_class().objects.all()
 
         try:
-            admin_class = admin_tanuki._registry[content_type.model_class()]
+            admin_class = admin.site._registry[content_type.model_class()]
 
             for obj in all_obj:
                 if admin_class.has_change_permission(request=self.request, obj=obj):
@@ -132,7 +130,7 @@ class EventChangeFieldGenerator(object):
                         for inline in inlines:
                             choices += self.get_children_tree(inline, obj)
         except Exception as e:
-            mylog.error(e)
+            print e
         finally:
             return choices
 
@@ -172,8 +170,8 @@ class EventChangeFieldGenerator(object):
         choices = list()
         fields = obj._meta.concrete_fields
         try:
-            fields_admin = admin_tanuki._registry[type(obj)].get_fields(self.request, obj)
-            read_only_admin = admin_tanuki._registry[type(obj)].get_readonly_fields(self.request, obj)
+            fields_admin = admin.site._registry[type(obj)].get_fields(self.request, obj)
+            read_only_admin = admin.site._registry[type(obj)].get_readonly_fields(self.request, obj)
         except (AttributeError, KeyError, NameError):
             fields_admin = [field.name for field in fields]
             read_only_admin = []
@@ -195,7 +193,7 @@ class EventChangeFieldGenerator(object):
         for i, item in enumerate(my_list):
             all_obj = item.model_class().objects.all()
             try:
-                admin_obj = admin_tanuki._registry[item.model_class()]
+                admin_obj = admin.site._registry[item.model_class()]
                 if len(all_obj) == 0:
                     qs = qs.exclude(id=item.id)
                 else:
@@ -290,7 +288,6 @@ class EventChangeFieldFormAdmin(forms.ModelForm):
         if self.instance.pk is not None:
             self.fields['object_custom'].choices = self.e.get_objects_tree(qs_parent.get(id=self.instance.parent_content_type.id))
             self.initial['object_custom'] = generate_value(self.instance.object_id, self.instance.content_type.id)
-            mylog.debug(self.instance.content_object)
             self.fields['field'].choices = self.e.get_fields_with_obj(self.instance.content_object)
 
         self.fields['parent_content_type'].queryset = self.e.get_content_type_queryset(qs_parent)
@@ -378,6 +375,7 @@ class TriggerDateInlineAdmin(admin.TabularInline):
         return True
 
 
+@admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     readonly_fields = ['done']
     inlines = [EventChangeInlineAdmin, TriggerDateInlineAdmin]
@@ -392,6 +390,3 @@ class EventAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return True
-
-
-admin_tanuki.register(Event, EventAdmin)

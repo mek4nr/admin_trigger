@@ -4,7 +4,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.core.signals import request_started
 from datetime import datetime
-from tanuki.contants import mylog
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.forms.models import fields_for_model
@@ -79,14 +78,14 @@ class EventChangeField(models.Model):
             setattr(self.content_object, self.field, self.parse_value())
             self.content_object.save()
         except AttributeError as e:
-            mylog.error(e)
+            print e
 
     def parse_value(self):
         t = fields_for_model(self.content_type.model_class())
         try:
             return t[self.field].clean(self.value)
         except ValidationError as e:
-            mylog.error(e)
+            print e
 
     class Meta:
         verbose_name = _(u'Change on done')

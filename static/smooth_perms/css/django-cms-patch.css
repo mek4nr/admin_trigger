@@ -1,0 +1,8 @@
+
+.colM ul:not(.object-tools){
+    margin: 0 !important;
+}
+
+.inline-group{
+    overflow: visible;
+}

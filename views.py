@@ -1,11 +1,11 @@
 from django.http import HttpResponse
-from event.admin import EventChangeFieldGenerator, generate_value, unparse_value
+from admin_trigger.admin import EventChangeFieldGenerator, generate_value, unparse_value
+from admin_trigger.models import Event
 from django.contrib.contenttypes.models import ContentType
 from django import forms
 from django.contrib.auth.decorators import login_required
-from tanuki.contants import mylog
 from django.forms.models import fields_for_model
-from event.models import Event
+from admin_trigger.models import Event
 import json
 
 
